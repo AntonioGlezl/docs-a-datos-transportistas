@@ -1,13 +1,13 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
-import { FIELDS, LINE_FIELDS, DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS, FIELD_KEYS, LINE_FIELD_KEYS, normalizeDocumentData } from './fields.js';
+import { FIELDS, LINE_FIELDS, DOCUMENT_TYPES, DOCUMENT_TYPE_LABELS, FIELD_KEYS, LINE_FIELD_KEYS, STATUSES, normalizeDocumentData } from './fields.js';
 import { validateDocument } from './validation.js';
 import { ExtractionError } from './extractor.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const IMAGE_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' };
-export const STATUSES = { ok: 'Correcto', pending: 'Pendiente de revisión', verified: 'Validado' };
+
 
 class HttpError extends Error {
   constructor(status, message) {

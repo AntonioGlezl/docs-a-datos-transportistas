@@ -114,3 +114,5 @@ export function parseNumber(value) {
   const n = Number(s);
   return Number.isFinite(n) ? n : null;
 }
+
+export const STATUSES = { ok: 'Correcto', pending: 'Pendiente de revisión', verified: 'Validado' };
