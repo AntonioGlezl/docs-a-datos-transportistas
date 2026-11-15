@@ -4,8 +4,8 @@
 import { FIELDS, LINE_FIELDS, DOCUMENT_TYPES, normalizeDocumentData } from './fields.js';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-/** Groq vision models accept at most 5 images per request. */
-export const MAX_IMAGES = 5;
+/** Default images per request (qwen/qwen3.8-27b accepts 3). */
+export const DEFAULT_MAX_IMAGES = 3;
 
 export class ExtractionError extends Error {
   constructor(message, { status = 502 } = {}) {
@@ -53,8 +53,9 @@ Reglas:
 
 function parseModelJson(content) {
   if (typeof content !== 'string') return null;
-  const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(content);
-  const candidate = (fenced ? fenced[1] : content).trim();
+  const visible = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  const fenced = /```(?:json)?\s*([\s\S]*?)```/i.exec(visible);
+  const candidate = (fenced ? fenced[1] : visible).trim();
   try {
     return JSON.parse(candidate);
   } catch {
@@ -77,9 +78,9 @@ function sanitizeConfidence(raw) {
 }
 
 /**
- * @param {{apiKey: string, model: string, fetch?: typeof fetch}} options
+ * @param {{apiKey: string, model: string, maxImages?: number, fetch?: typeof fetch}} options
  */
-export function createGroqExtractor({ apiKey, model, fetch = globalThis.fetch }) {
+export function createGroqExtractor({ apiKey, model, maxImages = DEFAULT_MAX_IMAGES, fetch = globalThis.fetch }) {
   return {
     /**
      * @param {string[]} images data URLs (image/jpeg or image/png)
@@ -95,7 +96,7 @@ export function createGroqExtractor({ apiKey, model, fetch = globalThis.fetch })
 
       const content = [
         { type: 'text', text: 'Extrae los datos de este documento.' },
-        ...images.slice(0, MAX_IMAGES).map((url) => ({ type: 'image_url', image_url: { url } })),
+        ...images.slice(0, maxImages).map((url) => ({ type: 'image_url', image_url: { url } })),
       ];
       const body = {
         model,
@@ -126,6 +127,10 @@ export function createGroqExtractor({ apiKey, model, fetch = globalThis.fetch })
           detail = errBody?.error?.message ?? '';
         } catch {
           /* ignore unreadable error bodies */
+        }
+        // Text-only models reject the image content array with "... content ... must be a string"
+        if (response.status === 400 && /content.*must be a string/i.test(detail)) {
+          throw new ExtractionError(`El modelo "${model}" no admite imágenes en Groq. Cambia GROQ_MODEL a un modelo de visión (por ejemplo qwen/qwen3.8-27b) y reinicia el servidor.`);
         }
         throw new ExtractionError(`Error de Groq (${response.status})${detail ? `: ${detail}` : ''}`);
       }

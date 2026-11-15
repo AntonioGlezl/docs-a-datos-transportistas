@@ -6,7 +6,7 @@ import { createApp } from './app.js';
 
 const config = loadConfig();
 const store = createStore(config.dataDir);
-const extractor = createGroqExtractor({ apiKey: config.groqApiKey, model: config.groqModel });
+const extractor = createGroqExtractor({ apiKey: config.groqApiKey, model: config.groqModel, maxImages: config.maxPages });
 const app = createApp({ store, extractor, config, exportWorkbook: buildWorkbook });
 
 if (!config.groqApiKey) {

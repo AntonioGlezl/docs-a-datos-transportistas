@@ -6,7 +6,7 @@ flagged for human review, and everything exports to one accumulated Excel workbo
 
 ## How it works
 
-1. **Capture** — the driver takes a photo with the phone camera or uploads images / a PDF (max 5 pages).
+1. **Capture** — the driver takes a photo with the phone camera or uploads images / a PDF (max 3 pages by default, `GROQ_MAX_IMAGES`).
    PDFs are rendered to images in the browser with pdf.js; photos are resized and compressed to JPEG.
 2. **Extract** — the server sends the pages to the Groq vision model, which returns structured JSON with
    a per-field confidence and the fields it could not read. The Groq API key never leaves the server.
@@ -43,7 +43,8 @@ Get a free Groq API key at <https://console.groq.com/keys>.
 | Variable | Default | Description |
 | --- | --- | --- |
 | `GROQ_API_KEY` | — | Required for extraction |
-| `GROQ_MODEL` | `meta-llama/llama-4-scout-17b-16e-instruct` | Any Groq vision model |
+| `GROQ_MODEL` | `qwen/qwen3.8-27b` | Any Groq vision model (text-only models fail with a clear error) |
+| `GROQ_MAX_IMAGES` | `3` | Pages per document sent in one request (model limit: 3 for qwen3.8-27b) |
 | `PORT` | `3000` | HTTP port |
 | `DATA_DIR` | `./data` | SQLite database and page images |
 | `CONFIDENCE_THRESHOLD` | `0.75` | Fields below this model confidence are flagged |
@@ -82,4 +83,5 @@ Code layout: `src/fields.js` (schema, single source of truth), `src/validation.j
 
 - No authentication: run it on a trusted network, or add auth before exposing it to the internet.
 - Groq free tier has rate limits; a `429` is shown to the driver as an error and nothing is stored.
-- Groq accepts at most 5 images per request, so only the first 5 pages are processed.
+- Groq vision models accept a limited number of images per request (3 for `qwen/qwen3.8-27b`), so only the first `GROQ_MAX_IMAGES` pages are processed.
+- Groq retires models often (`meta-llama/llama-4-scout-17b-16e-instruct` was deprecated). If extraction fails saying the model does not accept images, pick a current vision model from <https://console.groq.com/docs/vision>.

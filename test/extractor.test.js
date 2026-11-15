@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createGroqExtractor, ExtractionError, MAX_IMAGES } from '../src/extractor.js';
+import { createGroqExtractor, ExtractionError } from '../src/extractor.js';
 
 const IMG = 'data:image/jpeg;base64,AAAA';
 
@@ -65,12 +65,27 @@ test('accepts JSON wrapped in a markdown code fence', async () => {
   assert.equal(result.data.document_number, 'A1');
 });
 
-test('only the first MAX_IMAGES pages are sent', async () => {
-  const fetch = fakeFetch(completion('{"data":{}}'));
-  const extractor = createGroqExtractor({ apiKey: 'k', model: 'm', fetch });
-  await extractor.extract(Array(MAX_IMAGES + 3).fill(IMG));
-  const content = fetch.calls[0].body.messages.at(-1).content;
-  assert.equal(content.filter((c) => c.type === 'image_url').length, MAX_IMAGES);
+test('only the first maxImages pages are sent (default 3)', async () => {
+  let fetch = fakeFetch(completion('{"data":{}}'));
+  await createGroqExtractor({ apiKey: 'k', model: 'm', fetch }).extract(Array(6).fill(IMG));
+  assert.equal(fetch.calls[0].body.messages.at(-1).content.filter((c) => c.type === 'image_url').length, 3);
+
+  fetch = fakeFetch(completion('{"data":{}}'));
+  await createGroqExtractor({ apiKey: 'k', model: 'm', fetch, maxImages: 5 }).extract(Array(6).fill(IMG));
+  assert.equal(fetch.calls[0].body.messages.at(-1).content.filter((c) => c.type === 'image_url').length, 5);
+});
+
+test('explains when the configured model does not accept images', async () => {
+  const fetch = fakeFetch({ error: { message: "'messages.1' : for 'role:user' the following must be satisfied[('messages.1.content' : value must be a string)]" } }, { status: 400 });
+  const extractor = createGroqExtractor({ apiKey: 'k', model: 'meta-llama/llama-4-scout-17b-16e-instruct', fetch });
+  await assert.rejects(extractor.extract([IMG]), (err) => err instanceof ExtractionError
+    && err.message === 'El modelo "meta-llama/llama-4-scout-17b-16e-instruct" no admite imágenes en Groq. Cambia GROQ_MODEL a un modelo de visión (por ejemplo qwen/qwen3.8-27b) y reinicia el servidor.');
+});
+
+test('ignores <think> reasoning blocks before the JSON', async () => {
+  const content = '<think>El total parece 121</think>\n{"data":{"total_amount":121}}';
+  const extractor = createGroqExtractor({ apiKey: 'k', model: 'm', fetch: fakeFetch(completion(content)) });
+  assert.equal((await extractor.extract([IMG])).data.total_amount, 121);
 });
 
 test('fails with ExtractionError when the API key is missing, without calling the API', async () => {

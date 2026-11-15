@@ -84,6 +84,7 @@ export function createApp({ store, extractor, config, now = () => new Date(), ex
       lineFields: LINE_FIELDS,
       documentTypes: DOCUMENT_TYPES.map((value) => ({ value, label: DOCUMENT_TYPE_LABELS[value] })),
       statuses: STATUSES,
+      maxPages: config.maxPages,
     });
   });
 

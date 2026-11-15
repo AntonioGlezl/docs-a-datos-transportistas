@@ -2,7 +2,7 @@
 // Flow: capture/upload -> pages converted to JPEG in the browser (PDF via pdf.js) -> POST /api/documents
 // -> review form with doubtful fields highlighted -> save (driver) or validate (office) -> Excel export.
 
-const MAX_PAGES = 5;
+const DEFAULT_MAX_PAGES = 3; // replaced by /api/schema maxPages
 const MAX_SIDE = 2000;
 const MAX_DATA_URL_LENGTH = 3_800_000; // Groq rejects base64 images above ~4 MB
 const MODEL_DOUBT_CODES = new Set(['low_confidence', 'illegible']);
@@ -130,9 +130,10 @@ async function addFiles(fileList) {
   setStatus(status, 'Preparando páginas…');
   try {
     for (const file of files) {
-      const free = MAX_PAGES - state.pages.length;
+      const maxPages = state.schema?.maxPages ?? DEFAULT_MAX_PAGES;
+      const free = maxPages - state.pages.length;
       if (free <= 0) {
-        setStatus(status, `Máximo ${MAX_PAGES} páginas por documento.`, true);
+        setStatus(status, `Máximo ${maxPages} páginas por documento.`, true);
         break;
       }
       const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
@@ -386,6 +387,7 @@ async function refreshBadge() {
 
 async function init() {
   state.schema = await api('GET', '/api/schema');
+  $('#max-pages').textContent = String(state.schema.maxPages);
 
   const driver = $('#driver');
   driver.value = localStorage.getItem('driver') ?? '';

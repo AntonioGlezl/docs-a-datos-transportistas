@@ -31,7 +31,7 @@ beforeEach(async () => {
       return extractorResult;
     },
   };
-  const app = createApp({ store, extractor, config: { confidenceThreshold: 0.75 }, now: () => NOW });
+  const app = createApp({ store, extractor, config: { confidenceThreshold: 0.75, maxPages: 3 }, now: () => NOW });
   await new Promise((resolve) => { server = app.listen(0, resolve); });
   base = `http://127.0.0.1:${server.address().port}`;
 });
@@ -172,4 +172,5 @@ test('GET /api/schema exposes the field definitions for the UI', async () => {
   assert.ok(res.body.fields.some((f) => f.key === 'total_amount' && f.label === 'Total'));
   assert.ok(res.body.lineFields.some((f) => f.key === 'amount'));
   assert.deepEqual(res.body.documentTypes.map((t) => t.value), ['albaran', 'factura', 'cmr', 'otro']);
+  assert.equal(res.body.maxPages, 3);
 });
