@@ -17,15 +17,16 @@ Groq vision AI extracts the useful data, doubtful fields are flagged for human r
 
 ## Tasks
 
-- [ ] T1 Scaffold: git, package.json, Express server, config (.env) — S3, S7 — inline — commit: -
-- [ ] T2 Validation rules (doubtful detection) with tests — S5 — inline — commit: -
-- [ ] T3 Groq extraction service (prompt, JSON schema, normalization) — S3, S4 — inline — commit: -
-- [ ] T4 SQLite store + REST API (create, list, get, review, queue) with tests — S6, S9 — inline — commit: -
-- [ ] T5 Excel export (accumulated workbook) with tests — S8 — inline — commit: -
-- [ ] T6 Frontend: capture/upload, PDF→images, review form, office queue, export — S2, S5, S6 — inline — commit: -
-- [ ] T7 README (setup, Groq key, usage) — all — inline — commit: -
+- [x] T1 Scaffold: git, package.json, Express server, config (.env) — S3, S7 — inline — commit: 2a044f6
+- [x] T2 Validation rules (doubtful detection) with tests — S5 — inline — commit: 6cfb516
+- [x] T3 Groq extraction service (prompt, JSON schema, normalization) — S3, S4 — inline — commit: 2eac830
+- [x] T4 SQLite store + REST API (create, list, get, review, queue) with tests — S6, S9 — inline — commit: 4486be5
+- [x] T5 Excel export (accumulated workbook) with tests — S8 — inline — commit: 2349d6e
+- [x] T6 Frontend: capture/upload, PDF→images, review form, office queue, export — S2, S5, S6 — inline — commit: ce8cc40
+- [x] T7 README (setup, Groq key, usage) — all — inline — commit: (this commit)
 
 ## Log
 
 - L1: "vamos a crear en una webApp sencilla, donde un repartidor hace una foto o sube un imagen/pdf de un documento (albaran, factura, cmr...) y la ia (en este caso usaria la api de groq para pruebas sin gastar dinero) extrae toda la informacion util organizada exportandola a excel, tendra tambien avisos en los dudosos (en este caso habria intervencion humana)."
 - L2: Decisions: Stack "Node: Express + frontend HTML/JS"; Excel "Acumulado: un libro con varios documentos"; Persistence "SQLite en el servidor"; Human review "Ambos".
+- L3: Evidence: 37/37 node:test tests pass (validation, Groq extractor with mocked fetch, HTTP API, Excel). Server smoke-tested (static, pdf.js MIME, API, export). Headless Edge screenshots of capture and review views OK. Not verified: real Groq extraction (no GROQ_API_KEY available), real PDF/camera capture in a browser.
