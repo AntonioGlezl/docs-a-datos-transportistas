@@ -48,10 +48,26 @@ Get a free Groq API key at <https://console.groq.com/keys>.
 | `PORT` | `3000` | HTTP port |
 | `DATA_DIR` | `./data` | SQLite database and page images |
 | `CONFIDENCE_THRESHOLD` | `0.75` | Fields below this model confidence are flagged |
+| `CLOUDFLARED_PATH` | — | Optional path to `cloudflared` for `npm run share` |
 
-To use the camera from a phone, open the app over HTTPS or on the same machine (`localhost`):
-browsers only allow camera capture on secure origins. For testing on a phone in the same network you
-can use a tunnel such as `npx localtunnel --port 3000` or `cloudflared`.
+### Temporary public URL (`npm run share`)
+
+To test on other devices or let other people try it, run:
+
+```bash
+npm run share
+```
+
+It starts the app and opens a [Cloudflare quick tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/)
+(no account needed), then prints an HTTPS URL like `https://<random-words>.trycloudflare.com`.
+The app keeps running on your machine; the URL changes on every run and stops working when you
+press `Ctrl+C`, which closes both the app and the tunnel. HTTPS also makes camera capture work on phones.
+
+Requires `cloudflared` (`winget install Cloudflare.cloudflared`). It is looked up in `CLOUDFLARED_PATH`,
+then `PATH`, then the default Windows install folders.
+
+> The app has no login: anyone with the URL can see and delete documents and spends your Groq quota.
+> Share it only with testers and close it when you are done.
 
 ## API
 
