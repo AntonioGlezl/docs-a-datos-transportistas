@@ -17,7 +17,9 @@
 }
 
 * { box-sizing: border-box; }
-body { margin: 0; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body { margin: 0; overflow-x: hidden; }
+img { max-width: 100%; }
 main { max-width: 1200px; margin: 0 auto; padding: 16px; }
 
 .topbar { background: var(--brand); color: #fff; padding: 12px 16px 0; position: sticky; top: 0; z-index: 10; }
@@ -65,9 +67,10 @@ input:focus, select:focus { outline: 2px solid var(--brand-2); outline-offset: 1
 
 .review-layout { display: grid; grid-template-columns: 1fr; gap: 16px; }
 @media (min-width: 900px) { .review-layout { grid-template-columns: 340px 1fr; } .review-pages { position: sticky; top: 90px; align-self: start; } }
+.review-form, .review-pages { min-width: 0; }
 .review-pages img { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 8px; cursor: zoom-in; background: #fff; }
 
-.group { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin: 0 0 12px; }
+.group { min-width: 0; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin: 0 0 12px; }
 .group legend { font-weight: 700; padding: 0 6px; }
 .group-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 12px; }
 .field.doubtful input, .field.doubtful select { background: var(--warn-bg); border-color: #e0b100; }
@@ -94,3 +97,38 @@ input:focus, select:focus { outline: 2px solid var(--brand-2); outline-offset: 1
 dialog { border: 0; border-radius: var(--radius); padding: 8px; max-width: 95vw; max-height: 95vh; }
 dialog img { max-width: 90vw; max-height: 85vh; display: block; }
 dialog form { text-align: right; margin-top: 8px; }
+
+/* Mobile (portrait phones) */
+@media (max-width: 600px) {
+  main { padding: 12px 12px calc(12px + env(safe-area-inset-bottom)); }
+  .topbar { padding: 10px 12px 0; padding-top: calc(10px + env(safe-area-inset-top)); }
+  .topbar h1 { font-size: 1.05rem; margin-bottom: 4px; }
+  .tabs button { flex: 1; padding: 10px 8px; }
+
+  .capture-buttons { flex-direction: column; }
+  .btn-big { padding: 18px 16px; }
+  .page-list { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+  .page-list img { height: 120px; }
+
+  .actions { flex-wrap: wrap; }
+  .actions .btn { flex: 1 1 140px; }
+
+  .review-head { gap: 8px; }
+  .review-head h2 { font-size: 1.05rem; flex-basis: 100%; order: 3; overflow-wrap: anywhere; }
+
+  /* Page images: horizontal strip of thumbnails instead of full-width stack */
+  .review-pages { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; }
+  .review-pages img { width: auto; height: 160px; flex: 0 0 auto; margin: 0; scroll-snap-align: start; }
+
+  .group { padding: 10px 12px; }
+  .group-grid { grid-template-columns: 1fr; }
+  .sticky-actions { padding-bottom: calc(10px + env(safe-area-inset-bottom)); }
+
+  .list-toolbar { flex-direction: column; align-items: stretch; }
+  .list-toolbar .btn { width: 100%; }
+  .field.inline { flex-wrap: wrap; }
+  .doc-list button { grid-template-columns: 1fr; }
+
+  dialog { padding: 4px; }
+  dialog img { max-width: 100%; }
+}
